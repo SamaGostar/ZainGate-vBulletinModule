@@ -1,4 +1,5 @@
 <?php
+
 /*=============================================================================================*\
 || ########################################################################################### ||
 || # Product Name	: Zarin Pal Payment API Module for vBulletin		Version: 4.X.X
@@ -27,7 +28,8 @@ class vB_PaidSubscriptionMethod_zarinpalzg extends vB_PaidSubscriptionMethod
 	{		
 		$this->registry->input->clean_array_gpc('r', array(
 			'item'    => TYPE_STR,			
-			'au'    => TYPE_STR
+			'Authority'    => TYPE_STR,
+                        'Status'    => TYPE_STR
 		));  
 		
 		if (!class_exists('SoapClient'))
@@ -41,8 +43,12 @@ class vB_PaidSubscriptionMethod_zarinpalzg extends vB_PaidSubscriptionMethod
 			return false;
 		}
 		$this->transaction_id = $this->registry->GPC['Authority'];
-		if(!empty($this->registry->GPC['item']) AND !empty($this->registry->GPC['Authority']))
+
+		if(!empty($this->registry->GPC['Authority']))
 		{
+
+
+
 			$this->paymentinfo = $this->registry->db->query_first("
 				SELECT paymentinfo.*, user.username
 				FROM " . TABLE_PREFIX . "paymentinfo AS paymentinfo
@@ -51,6 +57,10 @@ class vB_PaidSubscriptionMethod_zarinpalzg extends vB_PaidSubscriptionMethod
 			");
 			if (!empty($this->paymentinfo) && $this->registry->GPC['Status'] == "OK")
 			{
+
+
+
+
 				$sub = $this->registry->db->query_first("SELECT * FROM " . TABLE_PREFIX . "subscription WHERE subscriptionid = " . $this->paymentinfo['subscriptionid']);
 				$cost = unserialize($sub['cost']);				
 				$amount = floor($cost[0][cost][usd]*$this->settings['d2t']);
@@ -70,11 +80,14 @@ class vB_PaidSubscriptionMethod_zarinpalzg extends vB_PaidSubscriptionMethod
 					return true;					
 				}else{
 					echo'ERR: '.$res->Status;
-				}				
+				}
+				
 			}
-		}		
-		$this->error = 'Duplicate transaction.';
-		return false;
+		}
+		else{
+			$this->error = 'Duplicate transaction.';
+			return false;
+		}
     }
 
 	function test()
